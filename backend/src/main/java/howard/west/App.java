@@ -3,11 +3,13 @@ package howard.west;
 import com.google.gson.Gson;
 import howard.west.dto.ResultDTO;
 import lombok.extern.slf4j.Slf4j;
-
 import static spark.Spark.before;
 import static spark.Spark.get;
+import java.io.IOException;
 import static spark.Spark.options;
 import static spark.Spark.port;
+import howard.west.Query;
+import java.util.*;
 
 @Slf4j
 public class App {
@@ -40,10 +42,11 @@ public class App {
     });
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException{
     // by default this is 4567 in order to prevent collisions with
     // other things that may be running on the machine.  We are running in a docker container
     // so that is not an issue
+    // Query query1 = new Query();
     port(8080);
 
     enableCORS("http://frontend.howard.test:4200", "GET", "");
@@ -61,7 +64,22 @@ public class App {
     get(
       "/search",
       "application/json",
-      (req, res) -> ResultDTO.builder().term(req.queryMap("q").value()),
-      gson::toJson); // <- this is called a method reference
+      (req, res) -> ResultDTO.builder().term(mockReturn(req.queryMap("q").value())),
+      gson::toJson); // <- this is called a method reference //req.queryMap("q").value()
+  }
+
+  public static String mockReturn( String term) throws IOException{
+    // String term = "movie";
+    Query query1 = new Query();
+    // Iterator it = term.entrySet().iterator();
+    // while (it.hasNext()) {
+    //     Map.Entry pair = (Map.Entry)it.next();
+    //     System.out.println(pair.getKey() + " = " + pair.getValue());
+    //     it.remove(); // avoids a ConcurrentModificationException
+    // }
+    // System.out.println(term);
+    List<String> resultsString = new ArrayList<String>();
+    resultsString = query1.getQuery(term.toLowerCase());
+    return resultsString.toString();
   }
 }
